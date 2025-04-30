@@ -1,0 +1,141 @@
+<%- contentFor('body') %>
+
+<div class="container">
+  <h1 class="mb-4">Carrito de Compras</h1>
+  
+  <% if (!cart || cart.items.length === 0) { %>
+    <div class="alert alert-info">
+      Tu carrito está vacío. <a href="/">Continuar comprando</a>
+    </div>
+  <% } else { %>
+    <div class="row">
+      <div class="col-8">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cart.items.forEach(item => { %>
+              <tr>
+                <td>
+                  <div class="cart-product">
+                    <% if (item.product.images && item.product.images.length > 0) { %>
+                      <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>" class="cart-product-image">
+                    <% } else { %>
+                      <img src="/img/placeholder.jpg" alt="Imagen del Producto" class="cart-product-image">
+                    <% } %>
+                    <div class="cart-product-info">
+                      <h4 class="cart-product-title"><%= item.product.name %></h4>
+                      <% if (item.product.category) { %>
+                        <p><small>Categoría: <%= item.product.category.name %></small></p>
+                      <% } %>
+                    </div>
+                  </div>
+                </td>
+                <td>$<%= item.price.toFixed(2) %></td>
+                <td>
+                  <form action="/cart/update" method="POST" class="cart-quantity">
+                    <input type="hidden" name="itemId" value="<%= item._id %>">
+                    <button type="button" class="quantity-btn quantity-decrease">-</button>
+                    <input type="number" name="quantity" value="<%= item.quantity %>" min="1" 
+                      max="<%= item.product.stock %>" class="form-control quantity-input">
+                    <button type="button" class="quantity-btn quantity-increase">+</button>
+                    <button type="submit" class="btn btn-sm btn-primary ml-2">Actualizar</button>
+                  </form>
+                </td>
+                <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+                <td>
+                  <form action="/cart/remove" method="POST">
+                    <input type="hidden" name="itemId" value="<%= item._id %>">
+                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        
+        <div class="flex justify-between mt-4">
+          <a href="/" class="btn btn-secondary">Continuar Comprando</a>
+          <form action="/cart/clear" method="POST">
+            <button type="submit" class="btn btn-danger">Vaciar Carrito</button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="col-4">
+        <div class="cart-summary">
+          <h3 class="cart-summary-title">Resumen del Pedido</h3>
+          
+          <div class="cart-summary-line">
+            <span class="cart-summary-label">Subtotal</span>
+            <span class="cart-summary-value">$<%= cartTotal.toFixed(2) %></span>
+          </div>
+          
+          <% if (locals.appliedOffer) { %>
+            <div class="cart-summary-line">
+              <span class="cart-summary-label">
+                Descuento 
+                <small>(<%= appliedOffer.code %>)</small>
+                <form action="/cart/remove-offer" method="POST" style="display: inline;">
+                  <button type="submit" class="btn btn-sm btn-danger">x</button>
+                </form>
+              </span>
+              <span class="cart-summary-value text-danger">
+                <% if (appliedOffer.type === 'percentage') { %>
+                  -<%= appliedOffer.value %>% ($<%= ((cartTotal * appliedOffer.value) / 100).toFixed(2) %>)
+                <% } else { %>
+                  -$<%= Math.min(appliedOffer.value, cartTotal).toFixed(2) %>
+                <% } %>
+              </span>
+            </div>
+            
+            <div class="cart-summary-line cart-summary-total">
+              <span class="cart-summary-label">Total</span>
+              <span class="cart-summary-value">
+                <% if (appliedOffer.type === 'percentage') { %>
+                  $<%= (cartTotal - ((cartTotal * appliedOffer.value) / 100)).toFixed(2) %>
+                <% } else { %>
+                  $<%= (cartTotal - Math.min(appliedOffer.value, cartTotal)).toFixed(2) %>
+                <% } %>
+              </span>
+            </div>
+          <% } else { %>
+            <div class="cart-summary-line cart-summary-total">
+              <span class="cart-summary-label">Total</span>
+              <span class="cart-summary-value">$<%= cartTotal.toFixed(2) %></span>
+            </div>
+            
+            <% if (availableOffers && availableOffers.length > 0) { %>
+              <div class="mt-3">
+                <h4>Ofertas Disponibles</h4>
+                <form action="/cart/apply-offer" method="POST" class="mt-2">
+                  <div class="form-group">
+                    <label for="offerCode">Código de Oferta</label>
+                    <div class="flex">
+                      <input type="text" name="offerCode" id="offerCode" class="form-control" placeholder="Ingresa código">
+                      <button type="submit" class="btn btn-primary ml-2">Aplicar</button>
+                    </div>
+                  </div>
+                </form>
+                <div class="mt-2">
+                  <% availableOffers.forEach(offer => { %>
+                    <p><small class="text-primary"><%= offer.code %></small> - <%= offer.title %></p>
+                  <% }); %>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+          
+          <a href="/checkout" class="btn btn-success btn-lg d-block mt-4">Proceder al Pago</a>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>

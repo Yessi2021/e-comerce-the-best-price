@@ -1,0 +1,250 @@
+<%- contentFor('body') %>
+
+<div class="container">
+  <div class="checkout-steps">
+    <div class="checkout-step completed">Carrito</div>
+    <div class="checkout-step active">Pago</div>
+    <div class="checkout-step">Confirmación</div>
+  </div>
+  
+  <div class="row">
+    <div class="col-8">
+      <form action="/checkout" method="POST" id="checkout-form">
+        <div class="checkout-section">
+          <h2 class="checkout-section-title">Información de Envío</h2>
+          
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label for="name">Nombre Completo</label>
+                <input type="text" name="name" id="name" class="form-control" 
+                  value="<%= user.name %>" required>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="form-group">
+                <label for="street">Dirección</label>
+                <input type="text" name="street" id="street" class="form-control" 
+                  value="<%= user.address ? user.address.street : '' %>" required>
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="form-group">
+                <label for="city">Ciudad</label>
+                <input type="text" name="city" id="city" class="form-control" 
+                  value="<%= user.address ? user.address.city : '' %>" required>
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="form-group">
+                <label for="state">Estado/Provincia</label>
+                <input type="text" name="state" id="state" class="form-control" 
+                  value="<%= user.address ? user.address.state : '' %>" required>
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="form-group">
+                <label for="postalCode">Código Postal</label>
+                <input type="text" name="postalCode" id="postalCode" class="form-control" 
+                  value="<%= user.address ? user.address.postalCode : '' %>" required>
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="form-group">
+                <label for="country">País</label>
+                <input type="text" name="country" id="country" class="form-control" 
+                  value="<%= user.address ? user.address.country : '' %>" required>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="checkout-section">
+          <h2 class="checkout-section-title">Método de Pago</h2>
+          
+          <div class="payment-options">
+            <div class="payment-option">
+              <input type="radio" name="paymentMethod" id="payment-cod" value="cod" class="payment-option-radio" checked>
+              <label for="payment-cod" class="payment-option-label">Pago contra entrega</label>
+              <div class="payment-option-description text-muted">
+                <small>Paga en efectivo al momento de recibir tu pedido</small>
+              </div>
+            </div>
+            
+            <div class="payment-option">
+              <input type="radio" name="paymentMethod" id="payment-stripe" value="stripe" class="payment-option-radio">
+              <label for="payment-stripe" class="payment-option-label">Tarjeta de Crédito / Débito</label>
+              <div class="payment-option-description text-muted">
+                <small>Pago seguro con tarjeta</small>
+              </div>
+            </div>
+          </div>
+          
+          <div id="credit-card-form" class="mt-4" style="display:none;">
+            <div class="row mb-3">
+              <div class="col-12">
+                <label for="card-number">Número de Tarjeta</label>
+                <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="card-expiry">Fecha de Vencimiento</label>
+                <input type="text" id="card-expiry" class="form-control" placeholder="MM/AA" maxlength="5">
+              </div>
+              <div class="col-6">
+                <label for="card-cvc">Código de Seguridad (CVC)</label>
+                <input type="text" id="card-cvc" class="form-control" placeholder="123" maxlength="3">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-12">
+                <label for="card-name">Nombre en la Tarjeta</label>
+                <input type="text" id="card-name" class="form-control" placeholder="Nombre como aparece en la tarjeta">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-button">Realizar Pedido</button>
+      </form>
+    </div>
+    
+    <div class="col-4">
+      <div class="cart-summary">
+        <h3 class="cart-summary-title">Resumen del Pedido</h3>
+        
+        <% cart.items.forEach(item => { %>
+          <div class="cart-summary-line">
+            <span><%= item.product.name %> x <%= item.quantity %></span>
+            <span>$<%= (item.price * item.quantity).toFixed(2) %></span>
+          </div>
+        <% }); %>
+        
+        <div class="cart-summary-line">
+          <span class="cart-summary-label">Subtotal</span>
+          <span class="cart-summary-value">$<%= cartTotal.toFixed(2) %></span>
+        </div>
+        
+        <% if (discountAmount > 0) { %>
+          <div class="cart-summary-line">
+            <span class="cart-summary-label">Descuento</span>
+            <span class="cart-summary-value text-danger">-$<%= discountAmount.toFixed(2) %></span>
+          </div>
+        <% } %>
+        
+        <div class="cart-summary-line cart-summary-total">
+          <span class="cart-summary-label">Total</span>
+          <span class="cart-summary-value">$<%= finalTotal.toFixed(2) %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const paymentOptions = document.querySelectorAll('input[name="paymentMethod"]');
+    const creditCardForm = document.getElementById('credit-card-form');
+    const submitButton = document.getElementById('submit-button');
+    const cardNumberInput = document.getElementById('card-number');
+    const cardExpiryInput = document.getElementById('card-expiry');
+    const cardCvcInput = document.getElementById('card-cvc');
+    
+    // Formatear número de tarjeta automáticamente con espacios cada 4 dígitos
+    cardNumberInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      let formattedValue = '';
+      for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+          formattedValue += ' ';
+        }
+        formattedValue += value[i];
+      }
+      e.target.value = formattedValue;
+    });
+    
+    // Formatear fecha de expiración automáticamente (MM/YY)
+    cardExpiryInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 0) {
+        if (value.length <= 2) {
+          e.target.value = value;
+        } else {
+          e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+      }
+    });
+    
+    // Permitir solo números en el CVC
+    cardCvcInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    
+    // Mostrar/ocultar formulario de tarjeta según método de pago seleccionado
+    paymentOptions.forEach(option => {
+      option.addEventListener('change', function() {
+        if (this.value === 'stripe') {
+          creditCardForm.style.display = 'block';
+        } else {
+          creditCardForm.style.display = 'none';
+        }
+      });
+    });
+    
+    // Manejar envío del formulario
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+      const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      
+      if (selectedMethod === 'stripe') {
+        const cardNumber = cardNumberInput.value.replace(/\s+/g, '');
+        const cardExpiry = cardExpiryInput.value;
+        const cardCvc = cardCvcInput.value;
+        const cardName = document.getElementById('card-name').value;
+        
+        // Validación simple
+        if (cardNumber.length < 16) {
+          e.preventDefault();
+          alert('Por favor introduce un número de tarjeta válido (16 dígitos)');
+          return false;
+        }
+        
+        if (!cardExpiry || cardExpiry.length < 5) {
+          e.preventDefault();
+          alert('Por favor introduce una fecha de expiración válida');
+          return false;
+        }
+        
+        if (!cardCvc || cardCvc.length < 3) {
+          e.preventDefault();
+          alert('Por favor introduce un código de seguridad válido');
+          return false;
+        }
+        
+        if (!cardName) {
+          e.preventDefault();
+          alert('Por favor introduce el nombre como aparece en la tarjeta');
+          return false;
+        }
+        
+        // Simulamos procesamiento exitoso - mostrar un mensaje mientras "procesa"
+        e.preventDefault();
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Procesando pago...';
+        
+        // Simular tiempo de procesamiento
+        setTimeout(() => {
+          // Continuar con el envío después de la simulación
+          e.target.submit();
+        }, 2000);
+      }
+    });
+  });
+</script>

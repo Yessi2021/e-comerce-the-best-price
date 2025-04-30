@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Categorías</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para íconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #ff9f43;
+            --dark-color: #2d3436;
+            --light-color: #f9f9f9;
+            --success-color: #20bf6b;
+            --warning-color: #f7b731;
+            --danger-color: #eb4d4b;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .admin-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        .category-card {
+            border-radius: 12px;
+            border: none;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-body {
+            flex-grow: 1;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-bottom: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 10px;
+        }
+        
+        .category-card:hover .card-title {
+            transform: scale(1.05);
+            color: var(--primary-color);
+        }
+        
+        .card-footer {
+            background-color: #f8f9fa;
+            border-top: none;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            border-radius: 30px;
+            font-weight: 500;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e5a923;
+            border-color: #e5a923;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(247, 183, 49, 0.3);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d63031;
+            border-color: #d63031;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(235, 77, 75, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #dfe6e9;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            color: #95a5a6;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Animación para las tarjetas */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-card {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container admin-container">
+        <div class="admin-header">
+            <h2 class="admin-title">Administración de Categorías</h2>
+        </div>
+
+        <!-- Contenedor principal para las categorías -->
+        <div class="row">
+            <% if (locals.categories && locals.categories.length > 0) { %>
+                <% categories.forEach((category, index) => { %>
+                    <!-- Columna para cada categoría con animación retrasada -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4 animate-card" style="animation-delay: <%= index * 0.05 %>s">
+                        <div class="category-card">
+                            <!-- Título de la categoría -->
+                            <div class="card-body">
+                                <h5 class="card-title"><%= category.name %></h5>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="card-footer">
+                                <a href="/categories/edit/<%= category._id %>" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit me-1"></i> Editar
+                                </a>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-danger btn-sm delete-category"
+                                    data-id="<%= category._id %>"
+                                    data-name="<%= category.name %>"
+                                    onclick="handleDelete(event)">
+                                    <i class="fas fa-trash me-1"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-tags"></i>
+                        <p>No hay categorías disponibles.</p>
+                        <a href="/admin/categories/new" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i> Crear la primera categoría
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Botón para agregar una nueva categoría -->
+        <div class="text-center mt-4">
+            <a href="/admin/categories/new" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i> Agregar Categoría
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script para manejar la eliminación -->
+    <script>
+        function handleDelete(event) {
+            // Prevenir el comportamiento predeterminado del botón
+            event.preventDefault();
+
+            // Obtener el elemento del botón
+            const btn = event.currentTarget;
+            
+            // Obtener el ID y nombre de la categoría desde los atributos data
+            const categoryId = btn.dataset.id;
+            const categoryName = btn.dataset.name || 'esta categoría';
+
+            // Mostrar un mensaje de confirmación
+            const isConfirmed = confirm(`¿Estás seguro de eliminar la categoría "${categoryName}"?`);
+
+            if (isConfirmed) {
+                // Si el usuario confirma, mostrar un indicador de carga en el botón
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+                btn.disabled = true;
+
+                // Enviar una solicitud POST al servidor usando Fetch API
+                fetch(`/admin/categories/eliminar/${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Animación de desvanecimiento para la tarjeta
+                        const card = btn.closest('.animate-card');
+                        card.style.transition = 'all 0.5s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.8)';
+                        
+                        // Recargar la página después de la animación
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = '<i class="fas fa-trash me-1"></i> Eliminar';
+                    btn.disabled = false;
+                    alert('Ocurrió un error al intentar eliminar la categoría');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

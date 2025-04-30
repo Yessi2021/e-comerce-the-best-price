@@ -1,0 +1,488 @@
+<%- contentFor('body') %>
+
+<style>
+  :root {
+    --primary-color: #ff6b6b;
+    --secondary-color: #ff9f43;
+    --dark-color: #2d3436;
+    --light-color: #f9f9f9;
+    --success-color: #20bf6b;
+    --warning-color: #f7b731;
+    --danger-color: #eb4d4b;
+    --info-color: #4b7bec;
+  }
+  
+  .dashboard-container {
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+  }
+  
+  .dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f1f1;
+  }
+  
+  .dashboard-title::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    border-radius: 2px;
+  }
+  
+  /* Estadísticas */
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+  }
+  
+  .stat-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-card:nth-child(1)::before {
+    background: linear-gradient(90deg, #4b7bec, #3867d6);
+  }
+  
+  .stat-card:nth-child(2)::before {
+    background: linear-gradient(90deg, #20bf6b, #0fb9b1);
+  }
+  
+  .stat-card:nth-child(3)::before {
+    background: linear-gradient(90deg, #f7b731, #fa8231);
+  }
+  
+  .stat-card:nth-child(4)::before {
+    background: linear-gradient(90deg, #eb4d4b, #ff7979);
+  }
+  
+  .stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-card:nth-child(1) .stat-icon {
+    background: -webkit-linear-gradient(45deg, #4b7bec, #3867d6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-card:nth-child(2) .stat-icon {
+    background: -webkit-linear-gradient(45deg, #20bf6b, #0fb9b1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-card:nth-child(3) .stat-icon {
+    background: -webkit-linear-gradient(45deg, #f7b731, #fa8231);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-card:nth-child(4) .stat-icon {
+    background: -webkit-linear-gradient(45deg, #eb4d4b, #ff7979);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin-bottom: 5px;
+  }
+  
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+  }
+  
+  .stat-description {
+    color: #95a5a6;
+    margin-bottom: 0;
+  }
+  
+  .stat-description a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .stat-description a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+  }
+
+  /* Secciones del Dashboard */
+  .dashboard-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+  }
+  
+  .dashboard-section {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .dashboard-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f1f1;
+    position: relative;
+  }
+  
+  .dashboard-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 3px;
+  }
+  
+  /* Tablas */
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+  }
+  
+  .admin-table thead th {
+    background-color: #f8f9fa;
+    color: #576574;
+    font-weight: 600;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #edf2f7;
+  }
+  
+  .admin-table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #edf2f7;
+    color: #576574;
+    vertical-align: middle;
+  }
+  
+  .admin-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .admin-table tbody tr {
+    transition: all 0.2s ease;
+  }
+  
+  .admin-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* Badges */
+  .badge {
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    display: inline-block;
+  }
+  
+  .badge-success {
+    background-color: rgba(32, 191, 107, 0.15);
+    color: var(--success-color);
+  }
+  
+  .badge-warning {
+    background-color: rgba(247, 183, 49, 0.15);
+    color: var(--warning-color);
+  }
+  
+  .badge-danger {
+    background-color: rgba(235, 77, 75, 0.15);
+    color: var(--danger-color);
+  }
+  
+  .badge-primary {
+    background-color: rgba(75, 123, 236, 0.15);
+    color: var(--info-color);
+  }
+  
+  /* Botones */
+  .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 30px;
+    font-weight: 600;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem;
+  }
+  
+  /* Responsive */
+  @media (max-width: 992px) {
+    .dashboard-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard-sections {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="container dashboard-container">
+  <h1 class="dashboard-title">Panel de Administración</h1>
+  
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <i class="fas fa-box stat-icon"></i>
+      <h3 class="stat-title">Productos</h3>
+      <div class="stat-value"><%= productCount %></div>
+      <p class="stat-description">
+        <a href="/admin/products">Gestionar Productos</a>
+      </p>
+    </div>
+    
+    <div class="stat-card">
+      <i class="fas fa-tags stat-icon"></i>
+      <h3 class="stat-title">Categorías</h3>
+      <div class="stat-value"><%= categoryCount %></div>
+      <p class="stat-description">
+        <a href="/admin/categories">Gestionar Categorías</a>
+      </p>
+    </div>
+    
+    <div class="stat-card">
+      <i class="fas fa-users stat-icon"></i>
+      <h3 class="stat-title">Clientes</h3>
+      <div class="stat-value"><%= userCount %></div>
+      <p class="stat-description">Usuarios registrados</p>
+    </div>
+    
+    <div class="stat-card">
+      <i class="fas fa-shopping-cart stat-icon"></i>
+      <h3 class="stat-title">Órdenes</h3>
+      <div class="stat-value"><%= orderCount %></div>
+      <p class="stat-description">
+        <a href="/admin/orders">Gestionar Órdenes</a>
+      </p>
+    </div>
+  </div>
+  
+  <div class="dashboard-sections">
+    <div class="dashboard-section">
+      <h2 class="dashboard-section-title">Órdenes Recientes</h2>
+      
+      <% if (recentOrders && recentOrders.length > 0) { %>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentOrders.forEach(order => { %>
+              <tr>
+                <td><%= order._id.toString().substring(0, 8) %>...</td>
+                <td><%= order.user.name %></td>
+                <td><strong>$<%= order.total.toFixed(2) %></strong></td>
+                <td>
+                  <span class="badge 
+                    <%= order.status === 'paid' ? 'badge-success' : 
+                      order.status === 'pending' ? 'badge-warning' : 
+                      order.status === 'shipped' ? 'badge-primary' : 
+                      order.status === 'delivered' ? 'badge-success' : 
+                      'badge-danger' %>">
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                  </span>
+                </td>
+                <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <a href="#" class="btn btn-sm btn-primary">Ver</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <div class="text-center py-4">
+          <i class="fas fa-shopping-bag text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+          <p class="mt-3 text-muted">No hay órdenes recientes.</p>
+        </div>
+      <% } %>
+    </div>
+    
+    <div class="dashboard-section">
+      <h2 class="dashboard-section-title">Productos con Bajo Stock</h2>
+      
+      <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% lowStockProducts.forEach(product => { %>
+              <tr>
+                <td><strong><%= product.name %></strong></td>
+                <td>
+                  <span class="badge <%= product.stock < 5 ? 'badge-danger' : 'badge-warning' %>">
+                    <%= product.stock %> unidades
+                  </span>
+                </td>
+                <td>
+                  <a href="/admin/products/<%= product._id %>/edit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Editar
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <div class="text-center py-4">
+          <i class="fas fa-check-circle text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+          <p class="mt-3 text-muted">Todos los productos tienen stock suficiente.</p>
+        </div>
+      <% } %>
+      
+      <div class="text-right mt-3">
+        <a href="/admin/products" class="btn btn-sm btn-primary">
+          <i class="fas fa-list"></i> Ver Todos los Productos
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-section mt-4">
+    <h2 class="dashboard-section-title">Acciones Rápidas</h2>
+    
+    <div class="row text-center">
+      <div class="col-md-3 col-sm-6 mb-3">
+        <a href="/admin/products/new" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-plus me-2"></i> Agregar Producto
+        </a>
+      </div>
+      
+      <div class="col-md-3 col-sm-6 mb-3">
+        <a href="/admin/categories/new" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-folder-plus me-2"></i> Crear Categoría
+        </a>
+      </div>
+      
+      <div class="col-md-3 col-sm-6 mb-3">
+        <a href="#" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-tag me-2"></i> Crear Oferta
+        </a>
+      </div>
+      
+      <div class="col-md-3 col-sm-6 mb-3">
+        <a href="#" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-download me-2"></i> Exportar Datos
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Animación de las tarjetas de estadísticas
+    const statCards = document.querySelectorAll('.stat-card');
+    
+    statCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'all 0.4s ease';
+      card.style.transitionDelay = `${index * 0.1}s`;
+      
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 100);
+    });
+  });
+</script>

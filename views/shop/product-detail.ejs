@@ -1,0 +1,152 @@
+<%- contentFor('body') %>
+
+<div class="container">
+  <div class="product-detail fade-in">
+    <div class="product-gallery">
+      <% if (product.images && product.images.length > 0) { %>
+        <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="product-main-image shadow">
+        
+        <% if (product.images.length > 1) { %>
+          <div class="product-thumbnails">
+            <% product.images.forEach((image, index) => { %>
+              <img src="<%= image %>" alt="<%= product.name %> <%= index + 1 %>" 
+                class="product-thumbnail <%= index === 0 ? 'active' : '' %> shadow">
+            <% }); %>
+          </div>
+        <% } %>
+      <% } else { %>
+        <img src="/img/placeholder.jpg" alt="Imagen del Producto" class="product-main-image shadow">
+      <% } %>
+    </div>
+    
+    <div class="product-info">
+      <h1 class="product-title"><%= product.name %></h1>
+      
+      <div class="product-price">
+        <% if (product.comparePrice > 0 && product.comparePrice > product.price) { %>
+          <span class="original-price">$<%= product.comparePrice.toFixed(2) %></span>
+        <% } %>
+        $<%= product.price.toFixed(2) %>
+      </div>
+      
+      <div class="product-description">
+        <%= product.description %>
+      </div>
+      
+      <div class="product-meta">
+        <div class="product-meta-item">
+          <span class="product-meta-label">Categoría:</span>
+          <span><a href="/category/<%= product.category.slug %>"><%= product.category.name %></a></span>
+        </div>
+        
+        <div class="product-meta-item">
+          <span class="product-meta-label">Disponibilidad:</span>
+          <% if (product.stock > 0) { %>
+            <span class="text-success">En Stock (<%= product.stock %> disponibles)</span>
+          <% } else { %>
+            <span class="text-danger">Agotado</span>
+          <% } %>
+        </div>
+      </div>
+      
+      <% if (product.stock > 0) { %>
+        <form action="/cart/add" method="POST" class="mt-4">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          
+          <div class="product-quantity">
+            <button type="button" class="quantity-btn quantity-decrease">-</button>
+            <input type="number" name="quantity" value="1" min="1" max="<%= product.stock %>" class="form-control quantity-input">
+            <button type="button" class="quantity-btn quantity-increase">+</button>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-lg mt-3">
+            <i class="fas fa-shopping-cart me-2"></i> Añadir al Carrito
+          </button>
+        </form>
+      <% } else { %>
+        <button class="btn btn-secondary btn-lg mt-4" disabled>
+          <i class="fas fa-times-circle me-2"></i> Agotado
+        </button>
+      <% } %>
+    </div>
+  </div>
+  
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section class="section">
+      <h2 class="section-title">Productos Relacionados</h2>
+      
+      <div class="product-grid">
+        <% relatedProducts.forEach(relatedProduct => { %>
+          <div class="card slide-in">
+            <% if (relatedProduct.images && relatedProduct.images.length > 0) { %>
+              <img src="<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.name %>" class="card-image">
+            <% } else { %>
+              <img src="/img/placeholder.jpg" alt="Imagen del Producto" class="card-image">
+            <% } %>
+            <div class="card-content">
+              <h3 class="card-title"><%= relatedProduct.name %></h3>
+              <p class="card-text"><%= relatedProduct.description.substring(0, 100) %>...</p>
+              <div class="card-price">
+                <% if (relatedProduct.comparePrice > 0 && relatedProduct.comparePrice > relatedProduct.price) { %>
+                  <span class="original-price">$<%= relatedProduct.comparePrice.toFixed(2) %></span>
+                <% } %>
+                $<%= relatedProduct.price.toFixed(2) %>
+              </div>
+              <a href="/products/<%= relatedProduct.slug %>" class="card-button">Ver Detalles</a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Scripts para la galería de imágenes -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar las miniaturas de imágenes
+      const thumbnails = document.querySelectorAll('.product-thumbnail');
+      const mainImage = document.querySelector('.product-main-image');
+      
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+          // Quitar la clase activa de todas las miniaturas
+          thumbnails.forEach(t => t.classList.remove('active'));
+          
+          // Agregar la clase activa a la miniatura seleccionada
+          this.classList.add('active');
+          
+          // Cambiar la imagen principal
+          mainImage.src = this.src;
+          mainImage.classList.add('fade-in');
+          
+          // Quitar la animación después de completarse
+          setTimeout(() => {
+            mainImage.classList.remove('fade-in');
+          }, 500);
+        });
+      });
+      
+      // Manejar los botones de cantidad
+      const decreaseBtn = document.querySelector('.quantity-decrease');
+      const increaseBtn = document.querySelector('.quantity-increase');
+      const quantityInput = document.querySelector('.quantity-input');
+      
+      if (decreaseBtn && increaseBtn && quantityInput) {
+        decreaseBtn.addEventListener('click', function() {
+          let value = parseInt(quantityInput.value);
+          if (value > 1) {
+            quantityInput.value = value - 1;
+          }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+          let value = parseInt(quantityInput.value);
+          let max = parseInt(quantityInput.getAttribute('max'));
+          if (value < max) {
+            quantityInput.value = value + 1;
+          }
+        });
+      }
+    });
+  </script>
+</div>

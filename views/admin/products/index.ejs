@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Productos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #ff9f43;
+            --dark-color: #2d3436;
+            --light-color: #f9f9f9;
+            --success-color: #20bf6b;
+            --warning-color: #f7b731;
+            --danger-color: #eb4d4b;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 15px;
+        }
+        
+        .admin-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .admin-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 5px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 30px;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 15px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert-success {
+            background-color: rgba(32, 191, 107, 0.15);
+            border-left: 4px solid var(--success-color);
+            color: #0d7040;
+        }
+        
+        .alert-danger {
+            background-color: rgba(235, 77, 75, 0.15);
+            border-left: 4px solid var(--danger-color);
+            color: #a82928;
+        }
+        
+        .product-table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .table-dark {
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .table > :not(caption) > * > * {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .badge.bg-primary {
+            background-color: #4b7bec !important;
+            box-shadow: 0 2px 5px rgba(75, 123, 236, 0.3);
+        }
+        
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important;
+            box-shadow: 0 2px 5px rgba(235, 77, 75, 0.3);
+        }
+        
+        .btn-group .btn {
+            border-radius: 6px;
+            margin: 0 3px;
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #4b7bec;
+            border-color: #4b7bec;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3867d6;
+            border-color: #3867d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 103, 214, 0.3);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d63031;
+            border-color: #d63031;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(214, 48, 49, 0.3);
+        }
+        
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .empty-state p {
+            color: #95a5a6;
+            margin-bottom: 15px;
+        }
+        
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-secondary {
+            background-color: #636e72;
+            border-color: #636e72;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4d5b5e;
+            border-color: #4d5b5e;
+        }
+        
+        /* Estilo para filas de tabla con hover */
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background-color: rgba(75, 123, 236, 0.05) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+        }
+        
+        /* Animación para las alertas */
+        .alert {
+            animation: slideDown 0.4s ease-in-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container admin-container">
+        <div class="admin-header">
+            <h2 class="admin-title">Administración de Productos</h2>
+            <a href="/admin/products/new" class="btn btn-add">
+                <i class="fas fa-plus me-2"></i> Agregar Producto
+            </a>
+        </div>
+
+        <!-- Mensajes de alerta para operaciones -->
+        <% if (locals.success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+        
+        <% if (locals.error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <!-- Tabla de productos -->
+        <div class="table-responsive product-table">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (products && products.length > 0) { %>
+                        <% products.forEach(product => { %>
+                            <tr>
+                                <td>
+                                    <% if (product.images && product.images.length > 0) { %>
+                                        <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="product-image">
+                                    <% } else { %>
+                                        <div class="bg-secondary product-image d-flex align-items-center justify-content-center text-white">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    <% } %>
+                                </td>
+                                <td><strong><%= product.name %></strong></td>
+                                <td><span class="text-success fw-bold">$<%= product.price.toFixed(2) %></span></td>
+                                <td><%= product.stock %> unidad<%= product.stock !== 1 ? 'es' : '' %></td>
+                                <td>
+                                    <% if (product.category) { %>
+                                        <span class="text-primary"><%= product.category.name %></span>
+                                    <% } else { %>
+                                        <span class="text-muted">Sin categoría</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (product.featured) { %>
+                                        <span class="badge bg-primary"><i class="fas fa-star me-1"></i> Destacado</span>
+                                    <% } %>
+                                    <% if (product.onSale) { %>
+                                        <span class="badge bg-danger"><i class="fas fa-tags me-1"></i> Oferta</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a href="/admin/products/<%= product._id %>/edit" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal" 
+                                                data-product-id="<%= product._id %>"
+                                                data-product-name="<%= product.name %>">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                <p class="mb-0">No hay productos disponibles</p>
+                                <a href="/admin/products/new" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus me-2"></i> Crear el primer producto
+                                </a>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmar eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar el producto <strong id="productName" class="text-danger"></strong>?</p>
+                    <p class="text-danger"><i class="fas fa-info-circle me-1"></i> <small>Esta acción no se puede deshacer.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <form id="deleteForm" action="" method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS y Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para manejar el modal de eliminación -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM completamente cargado");
+            
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function(event) {
+                    console.log("Modal abierto");
+                    const button = event.relatedTarget;
+                    const productId = button.getAttribute('data-product-id');
+                    const productName = button.getAttribute('data-product-name');
+                    
+                    document.getElementById('productName').textContent = productName;
+                    
+                    const deleteForm = document.getElementById('deleteForm');
+                    deleteForm.action = `/admin/products/${productId}`;
+                    
+                    console.log("Formulario configurado:", deleteForm.action);
+                });
+            } else {
+                console.log("No se encontró el modal");
+            }
+            
+            // Agregar evento de envío para depurar
+            const form = document.getElementById('deleteForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    console.log('Formulario enviado a:', this.action, 'con método:', this.method);
+                    console.log('_method value:', this.querySelector('input[name="_method"]').value);
+                });
+            }
+            
+            // Auto-cerrar las alertas después de 5 segundos
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
